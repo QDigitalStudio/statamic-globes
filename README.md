@@ -3,6 +3,8 @@ Statamic Add-on - Globes
 
 An add-on for the [Statamic CMS](http://statamic.com/) to give admins the ability to edit a theme's global variables.
 
+This is a modified version of [statamic-global-variable-editor](https://github.com/brettdewoody/statamic-global-variable-editor) also included in this addon is the [statamic-section-tabs](https://github.com/plainlanguage/statamic-section-tabs) add-on. Section fields in your theme globals will create tabs for your sections.
+
 Installation & Setup
 ------------
 
