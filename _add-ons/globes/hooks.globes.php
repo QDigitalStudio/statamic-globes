@@ -1,53 +1,64 @@
 <?php
 
-use Respect\Validation\Validator as v;
+class Hooks_globes extends Hooks
+{
+    public function control_panel__add_routes()
+    {
+        $app = \Slim\Slim::getInstance();
 
-class Hooks_globes extends Hooks {
+        $app->get('/globes', function () use ($app) {
+            authenticateForRole('admin');
+            doStatamicVersionCheck($app);
 
-	public function control_panel__add_routes(){
-		$app = \Slim\Slim::getInstance();
-		$tasks = $this->tasks;
+            Statamic_View::set_templates(array('globes-overview'), __DIR__.'/templates');
 
-		$app->get('/globes', function() use ($app, $tasks) {
-			authenticateForRole('admin');
-			doStatamicVersionCheck($app);
+            $data = $this->tasks->getThemeSettings();
 
-			$template_list = array("globes-overview");
-			Statamic_View::set_templates(array_reverse($template_list), __DIR__ . '/templates');
+            $app->render(null, array('route' => 'globes', 'app' => $app) + $data);
 
-			$data = $tasks->getOverviewData();
+        })->name('globes');
 
-			$app->render(null, array('route' => 'globes', 'app' => $app) + $data);
+        // Update global vars
+        $app->post('/globes/update', function () use ($app) {
+            authenticateForRole('admin');
+            doStatamicVersionCheck($app);
 
-		})->name('globes');
-		
-		
-		// Update global vars
-		$app->post('/globes/update', function() use ($app, $tasks) {
-			authenticateForRole('admin');
-			doStatamicVersionCheck($app);
-			
-			$action = Request::fetch('action');
-			
-			$vars = (array) Request::fetch('vars');
-			$data = $tasks->getOverviewData();
-			
-			$yamlContents = file($data['theme_settings']);
+            $data = $this->tasks->getThemeSettings();
+            $vars = Request::fetch('pageglobals');
 
-			foreach($vars as $key => $var) {
-				
-				$linesFound = preg_grep($key, $yamlContents);
-				$yamlContents[key($linesFound)] =  '  ' . substr($key,1,-1) . ': ' . $var . "\n";
-				
-			}
-			
-			file_put_contents($data['theme_settings'], implode($yamlContents));
+            foreach ($vars as $name => $var) {
+                foreach ($data['globals'] as $key => $item) {
+                    if ($item['name'] === $name) {
+                        $data['globals'][$key]['value'] = $var;
+                    }
+                }
+            }
 
-			$app->flash('success', Localization::fetch('update_success'));
+            File::put($this->tasks->getThemeSettingsPath(), YAML::dump($data, 1));
 
-			$app->redirect($app->urlFor('globes'));
-		});
-	
-	}
+            $app->flash('success', Localization::fetch('update_success'));
 
+            $app->redirect($app->urlFor('globes'));
+        });
+    }
+
+    public function control_panel__add_to_head()
+    {
+        // only needed on publish pages
+        if (URL::getCurrent(false) !== '/globes') {
+            return '';
+        }
+
+        return $this->css->link('globes');
+    }
+
+    public function control_panel__add_to_foot()
+    {
+        // only needed on publish pages
+        if (URL::getCurrent(false) !== '/globes') {
+            return '';
+        }
+
+        return $this->js->link('globes');
+    }
 }

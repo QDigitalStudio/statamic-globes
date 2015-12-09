@@ -1,26 +1,33 @@
 <?php
 
-use Symfony\Component\Finder\Finder as Finder;
-
 class Tasks_globes extends Tasks {
 
-	public function getOverviewData() {
+	public function getThemeSettingsPath() {
+		return Path::assemble(BASE_PATH, Config::getThemesPath(), Config::getTheme(), '/theme.yaml');
+	}
 
-		$theme_settings = Config::getThemesPath() . '/' . Config::getTheme() . '/theme.yaml';
+	public function getThemeSettings() {
+		$path = $this->getThemeSettingsPath();
 
-		$theme_yaml = File::get($theme_settings);
+		$yaml = YAML::parseFile($path);
+		return $yaml;
+	}
 
-		$settings = YAML::parse($theme_yaml);
+	public function getGlobals() {
+		$all = $this->getThemeSettings();
+		return ($all['globals']);
+	}
 
-		if (array_key_exists('global', $settings)) {
-			$globals = $settings['global'];
-		} else {
-			$globals = array(
-				'error' => 'No global key was found in your theme.yaml file'
-			);
+	public function getGlobal($global) {
+		$globals = $this->getGlobals();
+
+		foreach ($globals as $g) {
+			if ($g['name'] == $global) {
+				return $g['value'];
+			}
 		}
 
-		return compact('theme_settings', 'theme_yaml', 'globals');
+		return null;
 	}
 
 }
