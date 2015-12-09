@@ -14,27 +14,53 @@ Installation & Setup
 
 4. Open your `_themes/[theme-name]/theme.yaml` file define the global variables you want to be editable.
 
- To make a variable editable, first create a first-level var of `global`, then nest your variables under the `global` var.
+5. Create your yaml array of variables
 
- For example, if you wanted to have an editable phone number global variable you would do this.
+```
+    globals:
+      -
+        name: phone
+        display: Phone
+        value: 555-555-5555
+```
 
-    global:
+If you wanted to add another global variable, say an email address, your `globals` variable would look like so:
 
-    &nbsp;&nbsp;phone: 555-555-5555
+```
+    globals:
+      -
+        name: phone
+        display: Phone
+        value: 555-555-5555
+      -
+        name: email
+        display: Email
+        value: you@yourdomain.com
+```
 
- If you wanted to add another global variable, say an email address, your `global` variable would look like so:
+The allowed types are:
 
-    global:
+* `checkbox`
+* `checkboxes`
+* `date`
+* `markitup`
+* `radio`
+* `redactor` - no file uploads however
+* `select`
+* `tags`
+* `table`
+* `text`
+* `textarea`
+* `time`
+* `users`
 
-    &nbsp;&nbsp;phone: 555-555-5555
-
-    &nbsp;&nbsp;contact_email: you@yourdomain.com
-
-5. Display the global variables in your template using the `{{ global:NAME }}` tag. In our example from before, if we wanted to display the phone number we would add `{{ global:phone }}` to our templates or layouts.
 
 Usage
------
+------------
+There are two available methods in the plugin. The default method used by calling globes will return the value of the requested variable. Using globes:check you can condition the output based on the value of the variable being true or false. Globes doesn't work with standard if statements use globes:check instead.
 
-You'll have a new tab in your admin panel labeled `Globals`. Clicking the tab will display your editable global variables and give you the option to edit them.
-
-To change a value, simply enter the updated value, then click the Save & Publish button at the bottom.
+```
+  {{ globes:check name="<name>"}}
+    {{ globes name="<name>" }}
+  {{ /globes:check }}
+```
